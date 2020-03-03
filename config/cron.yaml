@@ -1,7 +1,7 @@
 //* * * * * minute hour day(month) month day(week)
-cron:
+cronConfigs:
   -
     path: "echo 'ojbk' >> cron.text"
-    cron: "* * * * *"
+    cronTime: "* * * * *"
     cronStdOut: "./success.log"
     cronStErr: "./error.log"
