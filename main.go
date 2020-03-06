@@ -14,6 +14,7 @@ type config struct {
 }
 
 type cronTabContent struct {
+
 	Path       string `mapstructure:"path"`
 	CronTime   string `mapstructure:"cronTime"`
 	CronStdOut string `mapstructure:"cronStdOut"`
