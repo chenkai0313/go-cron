@@ -3,5 +3,4 @@ cronConfigs:
   -
     path: "echo 'ojbk' >> cron.text"
     cronTime: "* * * * *"
-    cronStdOut: "./success.log"
-    cronStErr: "./error.log"
+    cronStdOut: "/Users/ck/Documents/go/src/go-cron/cron4/cron3/res.log"

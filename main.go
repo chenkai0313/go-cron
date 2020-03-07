@@ -5,7 +5,8 @@ import (
 	"os"
 	"os/exec"
 	"io"
-	"regexp"
+	"time"
+	"github.com/spf13/viper"
 )
 
 var Config config
@@ -23,39 +24,25 @@ type cronTabContent struct {
 	Path       string `mapstructure:"path"`
 	CronTime   string `mapstructure:"cronTime"`
 	CronStdOut string `mapstructure:"cronStdOut"`
-	CronStErr  string `mapstructure:"cronStErr"`
 }
 
 func main() {
-	file:="/Users/ck/Documents/go/src/go-cron/cron4/cron3.texa"
-	//blueurl := regexp.Match()'', file)
-	//fmt.Println(blueurl)
-	//
-	//[^/]+(?!.*/)
-	//one1, _ := regexp.Compile(`/([/][^/]+)$/`)
-	//index1 := one1.FindIndex([]byte(file))
 
-	reg := regexp.MustCompile(`(^/)$`)
-	fmt.Println(reg.FindAllString(file, -1))
+	viper.AddConfigPath("./config")
+	viper.SetConfigName("cron")
+	viper.SetConfigType("yaml")
 
-	//fmt.Println("FindIndex", index1)
-
-
-	//flysnowRegexp := regexp.MustCompile(`/([/][^/]+)$/`)
-	//params := flysnowRegexp.FindStringSubmatch(file)
-	//fmt.Println(params)
-	//for _,param :=range params {
-	//	fmt.Println(param)
-	//}
+	if err := viper.ReadInConfig(); err != nil {
+		panic(fmt.Errorf("Fatal error config file: %s \n", err))
+	}
+	if err := viper.Unmarshal(&Config); err != nil {
+		panic(fmt.Errorf("Fatal error on set value to Config: %s \n", err))
+	}
 
 
-	//f, err := os.OpenFile(file, os.O_CREATE|os.O_WRONLY, 0644)
-	//defer f.Close()
-	//if err != nil {
-	//	fmt.Println(err.Error())
-	//} else {
-	//	f.Write([]byte("黄河之水天上来，奔流到海不复回。\r\n"))
-	//}
+
+
+	//file:="/Users/ck/Documents/go/src/go-cron/cron4/cron3/cron3.text"
 
 	//res:=WriteLog(file,"ok")
 	//fmt.Println(res)
@@ -111,35 +98,50 @@ func Cmd(cmd string, shell bool) []byte {
 	}
 }
 
-func WriteLog(file, msg string) error {
-	if !IsExist(file) {
-		return CreateDirFile(file)
+func GetPath(file string) string{
+	file_byte:=[]byte(file)
+	var stop int
+
+	for x,s:=range file_byte{
+		if s== 47{
+			stop=x
+		}
 	}
+
+	return string(file_byte[0:stop])
+}
+
+func WriteLog(file, msg string) error {
+	path:=GetPath(file)
+	if !IsExist(path) {
+		 CreateDirFile(path)
+	}
+
 	var (
 		err error
 		f   *os.File
 	)
 
-	f, err = os.OpenFile(file, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	_, err = io.WriteString(f, LineFeed+msg)
+	timeUnix:=time.Now().Unix()
+	formatTimeStr:=time.Unix(timeUnix,0).Format("2006-01-02 15:04:05")
 
-	defer f.Close()
+	f, err = os.OpenFile(file, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	_, err = io.WriteString(f, formatTimeStr+LineFeed+msg+LineFeed)
+
+	 f.Close()
 	return err
 }
 
-//CreateDir  文件夹创建
 func CreateDirFile(filePath string) error {
-	f, err := os.Create(filePath) //传递文件路径
-	if err != nil {           //有错误
-		fmt.Println("err = ", err)
+	err := os.MkdirAll(filePath, os.ModePerm)
+	if err != nil {
 		return err
 	}
-	defer f.Close()
 	os.Chmod(filePath, os.ModePerm)
 	return nil
 }
 
-//IsExist  判断文件夹/文件是否存在  存在返回 true
+
 func IsExist(f string) bool {
 	_, err := os.Stat(f)
 	return err == nil || os.IsExist(err)
