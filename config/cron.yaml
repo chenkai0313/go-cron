@@ -1,6 +1,14 @@
-//* * * * * minute hour day(month) month day(week)
+#* * * * * minute hour day(month) month day(week)
 cronConfigs:
   -
-    path: "echo 'ojbk' >> cron.text"
-    cronTime: "* * * * *"
-    cronStdOut: "/Users/ck/Documents/go/src/go-cron/cron4/cron3/res.log"
+    path: "echo 'ojbk1111' >> cron1.text"
+    cronTime: "@every 5s"
+    cronStdOut: "/Users/ck/Documents/go/src/go-cron/cron1/cron1/res.log"
+  -
+    path: "ls -al >> cron2.text"
+    cronTime: "@every 3s"
+    cronStdOut: "/Users/ck/Documents/go/src/go-cron/cron2/cron2/res.log"
+  -
+    path: "echo 'ojbk333' >> cron3.text"
+    cronTime: "@every 8s"
+    cronStdOut: "/Users/ck/Documents/go/src/go-cron/cron33/cron3/res.log"

@@ -7,9 +7,10 @@ import (
 	"io"
 	"time"
 	"github.com/spf13/viper"
+	"github.com/robfig/cron"
 )
 
-var Config config
+var Configs config
 
 type config struct {
 	CronTabContents []cronTabContent `mapstructure:"cronConfigs"`
@@ -35,51 +36,28 @@ func main() {
 	if err := viper.ReadInConfig(); err != nil {
 		panic(fmt.Errorf("Fatal error config file: %s \n", err))
 	}
-	if err := viper.Unmarshal(&Config); err != nil {
+	if err := viper.Unmarshal(&Configs); err != nil {
 		panic(fmt.Errorf("Fatal error on set value to Config: %s \n", err))
 	}
+	c:=cron.New()
+	for _,x:=range Configs.CronTabContents {
+		Run(x.CronTime,x.Path,x.CronStdOut,c)
+	}
+	c.Start()
 
+	select {
 
-
-
-	//file:="/Users/ck/Documents/go/src/go-cron/cron4/cron3/cron3.text"
-
-	//res:=WriteLog(file,"ok")
-	//fmt.Println(res)
-
-	//fmt.Println(os.Getenv("GOPATH"))
-	//c := cron.New()
-	//c.AddFunc("* * * * * *", func() { fmt.Println("Every hour on the half hour") })
-	//c.AddFunc("@every 5s",test1)
-
-	//c.AddFunc("@every 5s",test2)
-	//c.Start()
-
-	//select {
-	//
-	//}
-	//c.Stop()
-
+	}
 }
 
-func test1() {
-	order:="echo 'ojbk1' >> cron1.text"
-	ttt:="3s"
-	fmt.Println(ttt)
-
-	res:=string(Cmd(order,true))
-
-	fmt.Println(res)
-}
-
-func test2() {
-	order:="ls -al"
-	ttt:="5s"
-	fmt.Println(ttt)
-
-	res:=string(Cmd(order,true))
-
-	fmt.Println(res)
+func Run(CronTime,Path,CronStdOut string,c *cron.Cron){
+	c.AddFunc(CronTime, func() {
+		resOut:=string(Cmd(Path,true))
+		err:=WriteLog(CronStdOut,resOut)
+		if err!=nil{
+			panic(fmt.Errorf("cron err: %s \n",err))
+		}
+	})
 }
 
 func Cmd(cmd string, shell bool) []byte {
